@@ -66,6 +66,8 @@ Let's create an extension method that will do the magic.
 ```C#
 using System.Reflection;
 
+using EgonsoftHU.Extensions.DependencyInjection;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -97,6 +99,8 @@ public static class MvcBuilderExtensions
 Now you can use it in your `Startup.cs` file.
 
 ```C#
+using EgonsoftHU.Extensions.DependencyInjection;
+
 using Microsoft.Extensions.DependencyInjection;
 
 public void ConfigureServices(IServiceCollection services)
