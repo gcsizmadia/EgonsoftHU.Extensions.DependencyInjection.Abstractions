@@ -177,7 +177,11 @@ namespace EgonsoftHU.Extensions.DependencyInjection
 
             logger.Verbose("ResolvedAssembly.FullName  = [{AssemblyFullName}]", assembly?.FullName ?? LoggingHelper.Unknown);
             logger.Verbose("ResolvedAssembly.Location  = [{AssemblyLocation}]", assembly.SafeGetLocation().DefaultIfNullOrWhiteSpace(LoggingHelper.Unknown));
+#if NETFRAMEWORK
             logger.Verbose("ResolvedAssembly.CodeBase  = [{AssemblyCodeBase}]", assembly.SafeGetCodeBase().DefaultIfNullOrWhiteSpace(LoggingHelper.Unknown));
+#else
+            logger.Verbose("ResolvedAssembly.CodeBase  = [{AssemblyCodeBase}]", assembly.SafeGetLocation().DefaultIfNullOrWhiteSpace(LoggingHelper.Unknown));
+#endif
 
             return assembly;
         }
@@ -190,7 +194,11 @@ namespace EgonsoftHU.Extensions.DependencyInjection
 
             logger.Verbose("LoadedAssembly.FullName = [{AssemblyFullName}]", assembly?.FullName ?? LoggingHelper.Unknown);
             logger.Verbose("LoadedAssembly.Location = [{AssemblyLocation}]", assembly.SafeGetLocation().DefaultIfNullOrWhiteSpace(LoggingHelper.Unknown));
+#if NETFRAMEWORK
             logger.Verbose("LoadedAssembly.CodeBase = [{AssemblyCodeBase}]", assembly.SafeGetCodeBase().DefaultIfNullOrWhiteSpace(LoggingHelper.Unknown));
+#else
+            logger.Verbose("LoadedAssembly.CodeBase = [{AssemblyCodeBase}]", assembly.SafeGetLocation().DefaultIfNullOrWhiteSpace(LoggingHelper.Unknown));
+#endif
 
             RegisterAssembly(assembly);
         }
