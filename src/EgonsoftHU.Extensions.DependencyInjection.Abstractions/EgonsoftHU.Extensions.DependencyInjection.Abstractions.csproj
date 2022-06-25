@@ -19,7 +19,9 @@ EgonsoftHU.Extensions.DependencyInjection.DefaultAssemblyRegistry</Description>
 Commonly Used Types:
 EgonsoftHU.Extensions.DependencyInjection.IAssemblyRegistry
 EgonsoftHU.Extensions.DependencyInjection.DefaultAssemblyRegistry</Summary>
-    <Copyright>Copyright © 2022 Gabor Csizmadia</Copyright>
+    <!--
+    <Copyright></Copyright>
+    -->
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/gcsizmadia/EgonsoftHU.Extensions.DependencyInjection.Abstractions</PackageProjectUrl>
@@ -38,7 +40,7 @@ EgonsoftHU.Extensions.DependencyInjection.DefaultAssemblyRegistry</Summary>
     -->
     <PackageType>Dependency</PackageType>
     <DevelopmentDependency>false</DevelopmentDependency>
-    <MinClientVersion>2.8</MinClientVersion>
+    <MinClientVersion>4.1.0</MinClientVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="EgonsoftHU.Extensions.Bcl" Version="1.0.2" />
