@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 
 using EgonsoftHU.Extensions.Bcl;
+using EgonsoftHU.Extensions.Logging.Serilog;
 
 using Serilog;
 
