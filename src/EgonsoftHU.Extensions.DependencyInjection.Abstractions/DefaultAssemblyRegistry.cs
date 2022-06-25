@@ -99,11 +99,11 @@ namespace EgonsoftHU.Extensions.DependencyInjection
                 return;
             }
 
-            var AssemblyRegistryEntry = new AssemblyRegistryEntry(assembly);
+            var assemblyRegistryEntry = new AssemblyRegistryEntry(assembly);
 
-            if (!assemblies.TryGetValue(AssemblyRegistryEntry.Name, out AssemblyRegistryEntry _))
+            if (!assemblies.TryGetValue(assemblyRegistryEntry.Name, out AssemblyRegistryEntry _))
             {
-                assemblies[AssemblyRegistryEntry.Name] = AssemblyRegistryEntry;
+                assemblies[assemblyRegistryEntry.Name] = assemblyRegistryEntry;
             }
         }
 
