@@ -21,11 +21,11 @@ namespace EgonsoftHU.Extensions.DependencyInjection
     {
         private static readonly string[] separator = new[] { ", " };
 
-        private static IAssemblyRegistry current;
+        private static IAssemblyRegistry? current;
 
         private readonly ILogger logger = LoggingHelper.GetLogger<DefaultAssemblyRegistry>();
 
-        private readonly Dictionary<string, AssemblyRegistryEntry> assemblies = new Dictionary<string, AssemblyRegistryEntry>();
+        private readonly Dictionary<string, AssemblyRegistryEntry> assemblies = new();
 
         private readonly IReadOnlyCollection<string> assemblyFileNamePrefixes;
 
@@ -36,7 +36,7 @@ namespace EgonsoftHU.Extensions.DependencyInjection
         public static IAssemblyRegistry Initialize(params string[] assemblyFileNamePrefixes)
         {
             current = new DefaultAssemblyRegistry(assemblyFileNamePrefixes);
-            
+
             return current;
         }
 
@@ -65,7 +65,7 @@ namespace EgonsoftHU.Extensions.DependencyInjection
         /// <summary>
         /// Gets the current instance of the <see cref="DefaultAssemblyRegistry"/> class.
         /// </summary>
-        public static IAssemblyRegistry Current => current;
+        public static IAssemblyRegistry? Current => current;
 
         /// <inheritdoc/>
         public IEnumerable<Assembly> GetAssemblies()
@@ -92,7 +92,7 @@ namespace EgonsoftHU.Extensions.DependencyInjection
             return relevantAssemblies;
         }
 
-        private void RegisterAssembly(Assembly assembly)
+        private void RegisterAssembly(Assembly? assembly)
         {
             if (assembly is null || !IsRelevantAssembly(assembly))
             {
@@ -145,11 +145,15 @@ namespace EgonsoftHU.Extensions.DependencyInjection
             assemblyFileNames.ForEach(assemblyFileName => LoadAssembly(assemblyFileName));
         }
 
-        private Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        private Assembly? CurrentDomain_AssemblyResolve(object? sender, ResolveEventArgs args)
         {
             ILogger logger = this.logger.Here();
 
+#if NETCOREAPP3_1
+            string requestedAssemblyFullName = args.Name ?? String.Empty;
+#else
             string requestedAssemblyFullName = args.Name;
+#endif
 
             string requestedAssemblyName =
                 requestedAssemblyFullName
@@ -159,9 +163,9 @@ namespace EgonsoftHU.Extensions.DependencyInjection
             logger.Verbose("RequestedAssembly.Name     = [{AssemblyName}]", requestedAssemblyName);
             logger.Verbose("RequestedAssembly.FullName = [{AssemblyFullName}]", requestedAssemblyFullName);
 
-            Assembly assembly = null;
+            Assembly? assembly = null;
 
-            if (assemblies.TryGetValue(requestedAssemblyName, out AssemblyRegistryEntry assemblyRegistryEntry))
+            if (assemblies.TryGetValue(requestedAssemblyName, out AssemblyRegistryEntry? assemblyRegistryEntry))
             {
                 assembly = assemblyRegistryEntry.Assembly;
             }
@@ -186,7 +190,7 @@ namespace EgonsoftHU.Extensions.DependencyInjection
             return assembly;
         }
 
-        private void CurrentDomain_AssemblyLoad(object sender, AssemblyLoadEventArgs args)
+        private void CurrentDomain_AssemblyLoad(object? sender, AssemblyLoadEventArgs args)
         {
             ILogger logger = this.logger.Here();
 
@@ -227,7 +231,7 @@ namespace EgonsoftHU.Extensions.DependencyInjection
                         new FileLoadException($"Load failed for assembly: [{assemblyFileName}]", assemblyFileName)
                     };
 
-                    exceptions.AddRange(ex.LoaderExceptions);
+                    exceptions.AddRange(ex.LoaderExceptions.Where(loaderEx => loaderEx is not null).Cast<Exception>());
 
                     throw new AggregateException(exceptions);
                 }
