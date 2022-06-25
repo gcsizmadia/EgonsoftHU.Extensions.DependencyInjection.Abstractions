@@ -6,20 +6,19 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{92F65356-6903-41EF-B1C3-76DAA09977D2}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		..\.gitignore = ..\.gitignore
-		app.manifest = app.manifest
+		.gitignore = .gitignore
+		src\app.manifest = src\app.manifest
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
-		GlobalAssemblyInfo.cs = GlobalAssemblyInfo.cs
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{98AAC7F7-CEE2-48F7-B859-5DD54451F047}"
 	ProjectSection(SolutionItems) = preProject
-		..\LICENSE = ..\LICENSE
-		..\README.md = ..\README.md
+		LICENSE = LICENSE
+		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgonsoftHU.Extensions.DependencyInjection.Abstractions", "EgonsoftHU.Extensions.DependencyInjection.Abstractions\EgonsoftHU.Extensions.DependencyInjection.Abstractions.csproj", "{A7C57C2D-528A-480D-9074-863704363FE9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgonsoftHU.Extensions.DependencyInjection.Abstractions", "src\EgonsoftHU.Extensions.DependencyInjection.Abstractions\EgonsoftHU.Extensions.DependencyInjection.Abstractions.csproj", "{A7C57C2D-528A-480D-9074-863704363FE9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
