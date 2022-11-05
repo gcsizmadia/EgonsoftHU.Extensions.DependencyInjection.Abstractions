@@ -24,6 +24,16 @@ namespace EgonsoftHU.Extensions.DependencyInjection
         private readonly IReadOnlyCollection<string> assemblyFileNamePrefixes;
 
         /// <summary>
+        /// Adds a delegate that will be used for logging. This may be called multiple times and the results will be additive.
+        /// </summary>
+        /// <param name="logAction">The log action.</param>
+        public static void ConfigureLogging(Action<ILogEvent> logAction)
+        {
+            logAction.ThrowIfNull();
+            LogEvent<DefaultAssemblyRegistry>.LogActions.Add(logAction);
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="DefaultAssemblyRegistry"/> class with the specified assembly file name prefixes.
         /// </summary>
         /// <param name="assemblyFileNamePrefixes">The prefixes of the assembly file names.</param>
