@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -21,8 +22,6 @@ namespace EgonsoftHU.Extensions.DependencyInjection
     {
         private static readonly string[] separator = new[] { ", " };
 
-        private static IAssemblyRegistry? current;
-
         private readonly ILogger logger = LoggingHelper.GetLogger<DefaultAssemblyRegistry>();
 
         private readonly Dictionary<string, AssemblyRegistryEntry> assemblies = new();
@@ -33,11 +32,12 @@ namespace EgonsoftHU.Extensions.DependencyInjection
         /// Initializes a new instance of the <see cref="DefaultAssemblyRegistry"/> class with the specified assembly file name prefixes.
         /// </summary>
         /// <param name="assemblyFileNamePrefixes">The prefixes of the assembly file names.</param>
+        [MemberNotNull(nameof(Current))]
         public static IAssemblyRegistry Initialize(params string[] assemblyFileNamePrefixes)
         {
-            current = new DefaultAssemblyRegistry(assemblyFileNamePrefixes);
+            Current = new DefaultAssemblyRegistry(assemblyFileNamePrefixes);
 
-            return current;
+            return Current;
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace EgonsoftHU.Extensions.DependencyInjection
         /// <summary>
         /// Gets the current instance of the <see cref="DefaultAssemblyRegistry"/> class.
         /// </summary>
-        public static IAssemblyRegistry? Current => current;
+        public static IAssemblyRegistry? Current { get; private set; }
 
         /// <inheritdoc/>
         public IEnumerable<Assembly> GetAssemblies()
