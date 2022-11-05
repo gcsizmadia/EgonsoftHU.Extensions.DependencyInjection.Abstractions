@@ -17,7 +17,7 @@ namespace EgonsoftHU.Extensions.DependencyInjection
     /// <summary>
     /// Default implementation of the <see cref="IAssemblyRegistry"/> interface.
     /// </summary>
-    public class DefaultAssemblyRegistry : IAssemblyRegistry
+    public sealed class DefaultAssemblyRegistry : IAssemblyRegistry
     {
         private static readonly string[] separator = new[] { ", " };
 
