@@ -27,10 +27,12 @@ namespace EgonsoftHU.Extensions.DependencyInjection
         /// Adds a delegate that will be used for logging. This may be called multiple times and the results will be additive.
         /// </summary>
         /// <param name="logAction">The log action.</param>
-        public static void ConfigureLogging(Action<ILogEvent> logAction)
+        /// <param name="loggingLibrary">The logging library used in the <paramref name="logAction"/>. By default, <see cref="LoggingLibrary.Other"/>.</param>
+        public static void ConfigureLogging(Action<ILogEvent> logAction, LoggingLibrary? loggingLibrary = LoggingLibrary.Other)
         {
             logAction.ThrowIfNull();
             LogEvent<DefaultAssemblyRegistry>.LogActions.Add(logAction);
+            LogEvent<DefaultAssemblyRegistry>.LoggingLibrary = loggingLibrary.GetValueOrDefault();
         }
 
         /// <summary>

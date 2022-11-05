@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 
 namespace EgonsoftHU.Extensions.DependencyInjection
@@ -15,6 +14,8 @@ namespace EgonsoftHU.Extensions.DependencyInjection
     {
         internal static readonly List<Action<ILogEvent>> LogActions = new();
 
+        internal static LoggingLibrary LoggingLibrary = LoggingLibrary.Other;
+
         private readonly Dictionary<string, object?> properties = new();
 
         internal LogEvent(ILogMessageTemplate messageTemplate, params object?[] arguments)
@@ -22,18 +23,18 @@ namespace EgonsoftHU.Extensions.DependencyInjection
             MessageTemplate = messageTemplate;
             Arguments = arguments;
 
-            AddProperty("SourceContext", typeof(TSourceContext).FullName);
+            AddProperty(LogConstants.SourceContext, typeof(TSourceContext).FullName);
         }
 
         public ILogMessageTemplate MessageTemplate { get; }
 
         public object?[] Arguments { get; }
 
-        public IReadOnlyDictionary<string, object?> Properties => new ReadOnlyDictionary<string, object?>(properties);
+        public IReadOnlyDictionary<string, object?> Properties => new LogEventProperties(properties, LoggingLibrary);
 
         internal LogEvent<TSourceContext> Here([CallerMemberName] string? sourceMemberName = null)
         {
-            return AddProperty("SourceMember", sourceMemberName);
+            return AddProperty(LogConstants.SourceMember, sourceMemberName);
         }
 
         internal LogEvent<TSourceContext> AddProperty(string key, object? value)
