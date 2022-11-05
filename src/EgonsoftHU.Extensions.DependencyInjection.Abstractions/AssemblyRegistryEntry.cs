@@ -1,7 +1,9 @@
 ﻿// Copyright © 2022 Gabor Csizmadia
 // This code is licensed under MIT license (see LICENSE for details)
 
+#if NETCOREAPP3_1_OR_GREATER
 using System;
+#endif
 using System.Reflection;
 
 namespace EgonsoftHU.Extensions.DependencyInjection
