@@ -9,9 +9,6 @@ using System.Linq;
 using System.Reflection;
 
 using EgonsoftHU.Extensions.Bcl;
-using EgonsoftHU.Extensions.Logging.Serilog;
-
-using Serilog;
 
 namespace EgonsoftHU.Extensions.DependencyInjection
 {
@@ -21,8 +18,6 @@ namespace EgonsoftHU.Extensions.DependencyInjection
     public sealed class DefaultAssemblyRegistry : IAssemblyRegistry
     {
         private static readonly string[] separator = new[] { ", " };
-
-        private readonly ILogger logger = LoggingHelper.GetLogger<DefaultAssemblyRegistry>();
 
         private readonly Dictionary<string, AssemblyRegistryEntry> assemblies = new();
 
@@ -70,23 +65,29 @@ namespace EgonsoftHU.Extensions.DependencyInjection
         /// <inheritdoc/>
         public IEnumerable<Assembly> GetAssemblies()
         {
-            ILogger logger = this.logger.Here();
-
             Assembly[] relevantAssemblies =
                 assemblies
                     .Select(kvp => kvp.Value.Assembly)
                     .OrderBy(assembly => assembly.FullName)
                     .ToArray();
 
-            logger.Verbose("Assemblies registered: {RegisteredAssemblyCount}", relevantAssemblies.Length);
+            new LogEvent<DefaultAssemblyRegistry>(LogMessageTemplate.RegisteredAssemblyCount, relevantAssemblies.Length).Here().Log();
 
             foreach (Assembly assembly in relevantAssemblies)
             {
-                logger.Verbose(
-                    "Assembly: FullName=[{AssemblyFullName}] Location=[{AssemblyLocation}]",
-                    assembly.FullName,
-                    assembly.SafeGetLocation().DefaultIfNullOrWhiteSpace(LoggingHelper.Unknown)
-                );
+                new LogEvent<DefaultAssemblyRegistry>(
+                    LogMessageTemplate.AssemblyFullName,
+                    assembly.FullName
+                )
+                    .Here()
+                    .Log();
+
+                new LogEvent<DefaultAssemblyRegistry>(
+                    LogMessageTemplate.AssemblyLocation,
+                    assembly.SafeGetLocation().DefaultIfNullOrWhiteSpace(LogConstants.Unknown)
+                )
+                    .Here()
+                    .Log();
             }
 
             return relevantAssemblies;
@@ -147,8 +148,6 @@ namespace EgonsoftHU.Extensions.DependencyInjection
 
         private Assembly? CurrentDomain_AssemblyResolve(object? sender, ResolveEventArgs args)
         {
-            ILogger logger = this.logger.Here();
-
 #if NETCOREAPP3_1
             string requestedAssemblyFullName = args.Name ?? String.Empty;
 #else
@@ -160,8 +159,8 @@ namespace EgonsoftHU.Extensions.DependencyInjection
                     .Split(separator, StringSplitOptions.RemoveEmptyEntries)
                     .First();
 
-            logger.Verbose("RequestedAssembly.Name     = [{AssemblyName}]", requestedAssemblyName);
-            logger.Verbose("RequestedAssembly.FullName = [{AssemblyFullName}]", requestedAssemblyFullName);
+            new LogEvent<DefaultAssemblyRegistry>(LogMessageTemplate.RequestedAssemblyName, requestedAssemblyName).Here().Log();
+            new LogEvent<DefaultAssemblyRegistry>(LogMessageTemplate.RequestedAssemblyFullName, requestedAssemblyFullName).Here().Log();
 
             Assembly? assembly = null;
 
@@ -179,30 +178,63 @@ namespace EgonsoftHU.Extensions.DependencyInjection
                 }
             }
 
-            logger.Verbose("ResolvedAssembly.FullName  = [{AssemblyFullName}]", assembly?.FullName ?? LoggingHelper.Unknown);
-            logger.Verbose("ResolvedAssembly.Location  = [{AssemblyLocation}]", assembly.SafeGetLocation().DefaultIfNullOrWhiteSpace(LoggingHelper.Unknown));
+            new LogEvent<DefaultAssemblyRegistry>(
+                LogMessageTemplate.ResolvedAssemblyFullName,
+                assembly?.FullName ?? LogConstants.Unknown
+            )
+                .Here()
+                .Log();
+
+
+            new LogEvent<DefaultAssemblyRegistry>(
+                LogMessageTemplate.ResolvedAssemblyLocation,
+                assembly.SafeGetLocation().DefaultIfNullOrWhiteSpace(LogConstants.Unknown)
+            )
+                .Here()
+                .Log();
+
+            new LogEvent<DefaultAssemblyRegistry>(
+                LogMessageTemplate.ResolvedAssemblyCodeBase,
 #if NETFRAMEWORK
-            logger.Verbose("ResolvedAssembly.CodeBase  = [{AssemblyCodeBase}]", assembly.SafeGetCodeBase().DefaultIfNullOrWhiteSpace(LoggingHelper.Unknown));
+                assembly.SafeGetCodeBase().DefaultIfNullOrWhiteSpace(LogConstants.Unknown)
 #else
-            logger.Verbose("ResolvedAssembly.CodeBase  = [{AssemblyCodeBase}]", assembly.SafeGetLocation().DefaultIfNullOrWhiteSpace(LoggingHelper.Unknown));
+                assembly.SafeGetLocation().DefaultIfNullOrWhiteSpace(LogConstants.Unknown)
 #endif
+            )
+                .Here()
+                .Log();
 
             return assembly;
         }
 
         private void CurrentDomain_AssemblyLoad(object? sender, AssemblyLoadEventArgs args)
         {
-            ILogger logger = this.logger.Here();
-
             Assembly assembly = args.LoadedAssembly;
 
-            logger.Verbose("LoadedAssembly.FullName = [{AssemblyFullName}]", assembly?.FullName ?? LoggingHelper.Unknown);
-            logger.Verbose("LoadedAssembly.Location = [{AssemblyLocation}]", assembly.SafeGetLocation().DefaultIfNullOrWhiteSpace(LoggingHelper.Unknown));
+            new LogEvent<DefaultAssemblyRegistry>(
+                LogMessageTemplate.LoadedAssemblyFullName,
+                assembly?.FullName ?? LogConstants.Unknown
+            )
+                .Here()
+                .Log();
+
+            new LogEvent<DefaultAssemblyRegistry>(
+                LogMessageTemplate.LoadedAssemblyLocation,
+                assembly.SafeGetLocation().DefaultIfNullOrWhiteSpace(LogConstants.Unknown)
+            )
+                .Here()
+                .Log();
+
+            new LogEvent<DefaultAssemblyRegistry>(
+                LogMessageTemplate.LoadedAssemblyCodeBase,
 #if NETFRAMEWORK
-            logger.Verbose("LoadedAssembly.CodeBase = [{AssemblyCodeBase}]", assembly.SafeGetCodeBase().DefaultIfNullOrWhiteSpace(LoggingHelper.Unknown));
+                assembly.SafeGetCodeBase().DefaultIfNullOrWhiteSpace(LogConstants.Unknown)
 #else
-            logger.Verbose("LoadedAssembly.CodeBase = [{AssemblyCodeBase}]", assembly.SafeGetLocation().DefaultIfNullOrWhiteSpace(LoggingHelper.Unknown));
+                assembly.SafeGetLocation().DefaultIfNullOrWhiteSpace(LogConstants.Unknown)
 #endif
+            )
+                .Here()
+                .Log();
 
             RegisterAssembly(assembly);
         }
