@@ -44,7 +44,7 @@ namespace EgonsoftHU.Extensions.DependencyInjection
         /// Initializes a new instance of the <see cref="DefaultAssemblyRegistry"/> class with the specified assembly file name prefixes.
         /// </summary>
         /// <param name="assemblyFileNamePrefixes">The prefixes of the assembly file names.</param>
-        public DefaultAssemblyRegistry(params string[] assemblyFileNamePrefixes)
+        private DefaultAssemblyRegistry(params string[] assemblyFileNamePrefixes)
         {
             this.assemblyFileNamePrefixes = new List<string>(assemblyFileNamePrefixes).AsReadOnly();
 
