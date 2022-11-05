@@ -19,7 +19,7 @@ namespace EgonsoftHU.Extensions.DependencyInjection
     {
         private static readonly string[] separator = new[] { ", " };
 
-        private readonly Dictionary<string, AssemblyRegistryEntry> assemblies = new();
+        private readonly Dictionary<string, AssemblyRegistryEntry> assemblies;
 
         private readonly IReadOnlyCollection<string> assemblyFileNamePrefixes;
 
@@ -51,6 +51,8 @@ namespace EgonsoftHU.Extensions.DependencyInjection
         /// <param name="assemblyFileNamePrefixes">The prefixes of the assembly file names.</param>
         private DefaultAssemblyRegistry(params string[] assemblyFileNamePrefixes)
         {
+            assemblies = new Dictionary<string, AssemblyRegistryEntry>();
+
             this.assemblyFileNamePrefixes = new List<string>(assemblyFileNamePrefixes).AsReadOnly();
 
             AppDomain
