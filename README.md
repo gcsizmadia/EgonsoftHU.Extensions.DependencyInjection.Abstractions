@@ -35,9 +35,101 @@ You can find the release notes [here](https://github.com/gcsizmadia/EgonsoftHU.E
 dotnet add package EgonsoftHU.Extensions.DependencyInjection.Abstractions
 ```
 
+***Then***, you may configure the logging of the `DefaultAssemblyRegistry` class to use the logging library you configured in your project.
+
+**Please note:**
+- The internal dependency to `Serilog` has been removed from the package, hence no log event from `DefaultAssemblyRegistry` is logged by default.
+- It is optional to configure logging for `DefaultAssemblyRegistry`.
+- There are 2 forms of the message templates:
+  - `logEvent.MessageTemplate.Structured` for use with structured logging, e.g. `Serilog`.
+  - `logEvent.MessageTemplate.Indexed` for use with `String.Format()`.
+
+*Example configuration for **Serilog**:*
+
+```csharp
+using EgonsoftHU.Extensions.DependencyInjection;
+using EgonsoftHU.Extensions.Logging;
+
+using Serilog;
+
+ILogger logger = Log.Logger.ForContext<DefaultAssemblyRegistry>();
+
+DefaultAssemblyRegistry.ConfigureLogging(
+    logEvent =>
+    logger
+        .ForContext(PropertyBagEnricher.Create().AddRange(logEvent.Properties))
+        .Verbose(logEvent.MessageTemplate.Structured, logEvent.Arguments)
+);
+```
+
+*Example configuration for **Microsoft.Extensions.Logging**:*
+
+```csharp
+using EgonsoftHU.Extensions.DependencyInjection;
+
+using Microsoft.Extensions.Logging;
+
+ILogger logger =
+    LoggerFactory
+        .Create(
+            loggingBuilder =>
+            loggingBuilder
+                .SetMinimumLevel(LogLevel.Debug)
+                .AddSimpleConsole(options => options.SingleLine = true)
+        )
+        .CreateLogger<DefaultAssemblyRegistry>();
+
+DefaultAssemblyRegistry.ConfigureLogging(
+    logEvent =>
+    {
+        using (logger.BeginScope(logEvent.Properties))
+        {
+            logger.LogDebug(logEvent.MessageTemplate.Structured, logEvent.Arguments);
+        }
+    }
+);
+```
+
+*Example configuration for **System.Console**:*
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+using EgonsoftHU.Extensions.DependencyInjection;
+
+DefaultAssemblyRegistry.ConfigureLogging(
+    logEvent =>
+    {
+        var sb = new StringBuilder();
+
+        sb.AppendLine();
+        sb.AppendFormat(logEvent.MessageTemplate.Indexed, logEvent.Arguments);
+        sb.AppendLine();
+
+        int maxKeyLength = logEvent.Properties.Keys.Max(key => key.Length);
+
+        foreach (KeyValuePair<string, object?> property in logEvent.Properties)
+        {
+            sb.AppendFormat(
+                "  [{0}] = [{1}]",
+                property.Key.PadRight(maxKeyLength),
+                property.Value
+            );
+
+            sb.AppendLine();
+        }
+
+        Console.WriteLine(sb);
+    }
+);
+```
+
 ***Then***, you can initialize an instance of the `DefaultAssemblyRegistry` class by providing the file name prefixes of your assemblies.
 
-```C#
+```csharp
 using EgonsoftHU.Extensions.DependencyInjection;
 
 // This will search for assemblies as below then loads them into the current AppDomain:
@@ -51,7 +143,7 @@ DefaultAssemblyRegistry.Initialize("YourCompany", "Custom");
 
 ***Finally***, if you need the loaded assemblies then get the current instance of the `DefaultAssemblyRegistry` class.
 
-```C#
+```csharp
 using EgonsoftHU.Extensions.DependencyInjection;
 
 var assemblies = DefaultAssemblyRegistry.Current.GetAssemblies();
@@ -63,7 +155,7 @@ Suppose you have an ASP.NET Core project that needs to load controllers from oth
 
 Let's create an extension method that will do the magic.
 
-```C#
+```csharp
 using System.Reflection;
 
 using EgonsoftHU.Extensions.DependencyInjection;
@@ -98,7 +190,7 @@ public static class MvcBuilderExtensions
 
 Now you can use it in your `Startup.cs` file.
 
-```C#
+```csharp
 using EgonsoftHU.Extensions.DependencyInjection;
 
 using Microsoft.Extensions.DependencyInjection;
