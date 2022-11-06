@@ -69,24 +69,31 @@ using EgonsoftHU.Extensions.DependencyInjection;
 
 using Microsoft.Extensions.Logging;
 
-ILogger logger =
-    LoggerFactory
-        .Create(
-            loggingBuilder =>
-            loggingBuilder
-                .SetMinimumLevel(LogLevel.Debug)
-                .AddSimpleConsole(options => options.SingleLine = true)
+ILoggerFactory loggerFactory = LoggerFactory.Create(
+    loggingBuilder =>
+    loggingBuilder
+        .SetMinimumLevel(LogLevel.Debug)
+        .AddJsonConsole(
+            options =>
+            {
+                options.IncludeScopes = true;
+                options.JsonWriterOptions = new() { Indented = true };
+            }
         )
-        .CreateLogger<DefaultAssemblyRegistry>();
+        .AddDebug()
+);
 
 DefaultAssemblyRegistry.ConfigureLogging(
     logEvent =>
     {
+        ILogger logger = loggerFactory.CreateLogger<DefaultAssemblyRegistry>();
+
         using (logger.BeginScope(logEvent.Properties))
         {
             logger.LogDebug(logEvent.MessageTemplate.Structured, logEvent.Arguments);
         }
-    }
+    },
+    LoggingLibrary.MicrosoftExtensionsLogging
 );
 ```
 
