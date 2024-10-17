@@ -1,10 +1,14 @@
-﻿// Copyright © 2022 Gabor Csizmadia
+﻿// Copyright © 2022-2024 Gabor Csizmadia
 // This code is licensed under MIT license (see LICENSE for details)
 
-namespace EgonsoftHU.Extensions.DependencyInjection
+using System;
+
+namespace EgonsoftHU.Extensions.DependencyInjection.Logging
 {
     internal sealed class LogMessageTemplate : ILogMessageTemplate
     {
+        internal static readonly LogMessageTemplate Empty = new(String.Empty, String.Empty);
+
         internal static readonly LogMessageTemplate RegisteredAssemblyCount =
             new(
                 "Assemblies registered: {0}",
