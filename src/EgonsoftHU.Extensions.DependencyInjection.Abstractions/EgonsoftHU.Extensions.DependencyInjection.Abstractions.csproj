@@ -48,6 +48,6 @@ EgonsoftHU.Extensions.DependencyInjection.DefaultAssemblyRegistry</Summary>
     -->
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="EgonsoftHU.Extensions.Bcl" Version="2.0.0" />
+    <PackageReference Include="EgonsoftHU.Extensions.Bcl" Version="3.0.1" />
   </ItemGroup>
 </Project>
