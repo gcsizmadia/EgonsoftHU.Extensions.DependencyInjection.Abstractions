@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 
 using EgonsoftHU.Extensions.Bcl;
+using EgonsoftHU.Extensions.Bcl.Constants;
 using EgonsoftHU.Extensions.DependencyInjection.Logging;
 
 namespace EgonsoftHU.Extensions.DependencyInjection
@@ -18,7 +19,7 @@ namespace EgonsoftHU.Extensions.DependencyInjection
     /// </summary>
     public sealed class DefaultAssemblyRegistry : IAssemblyRegistry
     {
-        private static readonly string[] separator = new[] { ", " };
+        private static readonly string[] separator = new[] { Strings.CommaSpaceSeparator };
 
         private static readonly Logger Logger = Logger.GetLogger<DefaultAssemblyRegistry>();
 
@@ -58,7 +59,7 @@ namespace EgonsoftHU.Extensions.DependencyInjection
         {
             assemblies = new Dictionary<string, AssemblyRegistryEntry>();
 
-            this.assemblyFileNamePrefixes = new List<string>(assemblyFileNamePrefixes).AsReadOnly();
+            this.assemblyFileNamePrefixes = assemblyFileNamePrefixes.AsReadOnly();
 
             AppDomain
                 .CurrentDomain
@@ -87,7 +88,7 @@ namespace EgonsoftHU.Extensions.DependencyInjection
             Assembly[] relevantAssemblies =
                 assemblies
                     .Select(kvp => kvp.Value.Assembly)
-                    .OrderBy(assembly => assembly.FullName)
+                    .OrderBy(GetAssemblyFullName)
                     .ToArray();
 
             logger.Log(LogMessageTemplate.RegisteredAssemblyCount, relevantAssemblies.Length);
@@ -110,7 +111,7 @@ namespace EgonsoftHU.Extensions.DependencyInjection
 
             var assemblyRegistryEntry = new AssemblyRegistryEntry(assembly);
 
-            if (!assemblies.TryGetValue(assemblyRegistryEntry.Name, out AssemblyRegistryEntry _))
+            if (!assemblies.TryGetValue(assemblyRegistryEntry.Name, out AssemblyRegistryEntry? _))
             {
                 assemblies[assemblyRegistryEntry.Name] = assemblyRegistryEntry;
             }
@@ -162,7 +163,11 @@ namespace EgonsoftHU.Extensions.DependencyInjection
 
             string requestedAssemblyName =
                 requestedAssemblyFullName
+#if NET5_0_OR_GREATER
+                    .Split(separator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+#else
                     .Split(separator, StringSplitOptions.RemoveEmptyEntries)
+#endif
                     .First();
 
             logger.Log(LogMessageTemplate.RequestedAssemblyName, requestedAssemblyName);
@@ -178,9 +183,9 @@ namespace EgonsoftHU.Extensions.DependencyInjection
             {
                 string[] assemblyFileNames = FindAssemblyFiles(requestedAssemblyName);
 
-                if (assemblyFileNames.Any())
+                if (assemblyFileNames.Length != 0)
                 {
-                    assembly = LoadAssembly(assemblyFileNames.First());
+                    assembly = LoadAssembly(assemblyFileNames[0]);
                 }
             }
 
@@ -224,6 +229,11 @@ namespace EgonsoftHU.Extensions.DependencyInjection
             RegisterAssembly(assembly);
         }
 
+        private static string GetAssemblyFullName(Assembly? assembly)
+        {
+            return assembly?.FullName ?? LogConstants.Unknown;
+        }
+
         private static string[] FindAssemblyFiles(string assemblyShortName)
         {
             return Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, $"{assemblyShortName}.dll", SearchOption.AllDirectories);
@@ -245,22 +255,32 @@ namespace EgonsoftHU.Extensions.DependencyInjection
                 {
                     var exceptions = new List<Exception>()
                     {
-                        new FileLoadException($"Load failed for assembly: [{assemblyFileName}]", assemblyFileName)
+                        CreateFileLoadException(assemblyFileName)
                     };
 
-                    exceptions.AddRange(ex.LoaderExceptions.Where(loaderEx => loaderEx is not null).Cast<Exception>());
+                    exceptions.AddRange(ex.LoaderExceptions.OfType<Exception>());
 
                     throw new AggregateException(exceptions);
                 }
                 catch (Exception ex)
                 {
-                    throw new FileLoadException($"Load failed for assembly: [{assemblyFileName}]", assemblyFileName, ex);
+                    throw CreateFileLoadException(assemblyFileName, ex);
                 }
             }
             else
             {
-                throw new FileNotFoundException($"Assembly not found: [{assemblyFileName}]", assemblyFileName);
+                throw CreateFileNotFoundException(assemblyFileName);
             }
+        }
+
+        private static FileLoadException CreateFileLoadException(string assemblyFileName, Exception? ex = null)
+        {
+            return new FileLoadException($"Load failed for assembly: [{assemblyFileName}]", assemblyFileName, ex);
+        }
+
+        private static FileNotFoundException CreateFileNotFoundException(string assemblyFileName)
+        {
+            return new FileNotFoundException($"Load failed for assembly: [{assemblyFileName}]", assemblyFileName);
         }
     }
 }
